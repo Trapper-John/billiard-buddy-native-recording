@@ -26,7 +26,8 @@ for abi in abis:
     for config in candidates:
         makefile = config.parent/'ffbuild/config.mak'
         text = makefile.read_text() if makefile.exists() else ''
-        if str(root/'prefix'/abi) in text:
+        # Include the separator: x86 must never match x86_64.
+        if str(root/'prefix'/abi)+'/' in text:
             matching.append(config)
     if len(matching) != 1:
         raise SystemExit(f'FAIL: cannot identify exactly one FFmpeg config for {abi}')
