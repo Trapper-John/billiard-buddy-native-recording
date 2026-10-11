@@ -1,0 +1,20 @@
+# https://mesonbuild.com/External-Project-module.html
+
+project('libvorbis', 'c')
+
+mod = import('unstable-external_project')
+
+p = mod.add_project('configure',
+    configure_options : [
+        '--prefix=@PREFIX@',
+        '--enable-static',
+        '--disable-shared',
+    ],
+    cross_configure_options : [
+        '--host=@0@-linux-@1@'.format(host_machine.cpu_family(), host_machine.system())
+    ],
+    verbose: true,
+)
+
+libvorbis_dep = p.dependency('libvorbis')
+meson.override_dependency('libvorbis', libvorbis_dep)

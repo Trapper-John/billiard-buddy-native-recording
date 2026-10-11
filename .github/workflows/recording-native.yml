@@ -1,0 +1,32 @@
+name: Build native recording candidate
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  native:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Connect Android SDK
+        working-directory: buildscripts
+        run: |
+          mkdir -p sdk
+          ln -s "$ANDROID_HOME" sdk/android-sdk-linux
+      - name: Build default with recording writers
+        working-directory: buildscripts
+        run: bash bundle_default.sh
+      - name: Verify compiled writers and collect provenance
+        working-directory: buildscripts
+        run: python3 ../verify_native.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: billiard-recording-native-candidate
+          path: buildscripts/artifacts/default/
+          if-no-files-found: error
